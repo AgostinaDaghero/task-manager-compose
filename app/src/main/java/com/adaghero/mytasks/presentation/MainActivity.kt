@@ -1,4 +1,4 @@
-package com.adaghero.mytasks
+package com.adaghero.mytasks.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

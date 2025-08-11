@@ -1,8 +1,9 @@
-package com.adaghero.mytasks
+package com.adaghero.mytasks.model
 
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 
-@OptIn(kotlinx.serialization.InternalSerializationApi::class)
+@OptIn(InternalSerializationApi::class)
 @Serializable
 data class Task(
     val id: Int,
