@@ -9,13 +9,19 @@ import java.io.File
 object TaskRepository {
     private const val FILE_NAME = "tasks.json"
 
+    // Instancia segura de Json (evita usar APIs internas)
+    private val json = Json {
+        prettyPrint = true
+        ignoreUnknownKeys = true
+    }
+
     fun loadTasks(context: Context): List<Task> {
         val file = File(context.filesDir, FILE_NAME)
         return if (!file.exists()) {
             emptyList()
         } else {
             try {
-                Json.Default.decodeFromString(file.readText())
+                json.decodeFromString(file.readText())
             } catch (e: Exception) {
                 emptyList()
             }
@@ -24,6 +30,6 @@ object TaskRepository {
 
     fun saveTasks(context: Context, tasks: List<Task>) {
         val file = File(context.filesDir, FILE_NAME)
-        file.writeText(Json.Default.encodeToString(tasks))
+        file.writeText(json.encodeToString(tasks))
     }
 }

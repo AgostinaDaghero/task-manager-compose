@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.adaghero.mytasks.viewmodel.TaskViewModel
+import com.adaghero.mytasks.model.Priority
+import androidx.compose.material.icons.filled.ArrowDropDown
 
 
 @Composable
@@ -19,6 +21,8 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
     val tasks by taskViewModel.tasks.collectAsState()
 
     var newTask by remember { mutableStateOf("") }
+    var selectedPriority by remember { mutableStateOf(Priority.MEDIUM) }
+    var menuExpanded by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -29,9 +33,37 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(8.dp))
+
+            // Priority selector
+            Box {
+                Button(onClick = { menuExpanded = true }) {
+                    Text(text = selectedPriority.name.lowercase().replaceFirstChar { it.uppercase() })
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = "Select priority")
+                }
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false }
+                ) {
+                    DropdownMenuItem(text = { Text("High") }, onClick = {
+                        selectedPriority = Priority.HIGH
+                        menuExpanded = false
+                    })
+                    DropdownMenuItem(text = { Text("Medium") }, onClick = {
+                        selectedPriority = Priority.MEDIUM
+                        menuExpanded = false
+                    })
+                    DropdownMenuItem(text = { Text("Low") }, onClick = {
+                        selectedPriority = Priority.LOW
+                        menuExpanded = false
+                    })
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
             Button(onClick = {
                 if (newTask.isNotBlank()) {
-                    taskViewModel.addTask(newTask)
+                    taskViewModel.addTask(newTask.trim(), selectedPriority)
                     newTask = ""
                 }
             }) {
@@ -51,11 +83,18 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
                 ) {
                     Checkbox(
                         checked = task.isDone,
-                        onCheckedChange = {
-                            taskViewModel.toggleTaskDone(task.id, it)
+                        onCheckedChange = { checked ->
+                            taskViewModel.toggleTaskDone(task.id, checked)
                         }
                     )
-                    Text(task.title, modifier = Modifier.weight(1f))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(task.title)
+                        // Show priority in small
+                        Text(
+                            text = task.priority.name.lowercase().replaceFirstChar { it.uppercase() },
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                     IconButton(onClick = {
                         taskViewModel.deleteTask(task.id)
                     }) {

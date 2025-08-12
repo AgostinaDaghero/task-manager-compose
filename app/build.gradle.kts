@@ -34,6 +34,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+        freeCompilerArgs += listOf("-Xopt-in=kotlinx.serialization.InternalSerializationApi")
     }
     buildFeatures {
         compose = true
