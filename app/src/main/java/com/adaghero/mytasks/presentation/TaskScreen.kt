@@ -30,7 +30,7 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
             TextField(
                 value = newTask,
                 onValueChange = { newTask = it },
-                label = { Text("Nueva tarea") },
+                label = { Text("New task") },
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -68,7 +68,7 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
                     newTask = ""
                 }
             }) {
-                Text("Agregar")
+                Text("Add")
             }
         }
 
@@ -99,7 +99,7 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
                     IconButton(onClick = {
                         taskViewModel.deleteTask(task.id)
                     }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Eliminar")
+                        Icon(Icons.Default.Delete, contentDescription = "Delete")
                     }
                 }
             }
