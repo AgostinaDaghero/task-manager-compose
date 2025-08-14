@@ -1,24 +1,35 @@
-# 📝 Task Manager - Kotlin Jetpack Compose
+# 📝 Task Manager — Kotlin + Jetpack Compose
 
-A **simple task manager** built with **Kotlin** and **Jetpack Compose** that allows you to:
+A simple yet capable task manager built with **Kotlin** and **Jetpack Compose**.  
+Now includes **task priorities**, a **habit planner**, and uses modern Android architecture components.
 
-- ➕ Add tasks  
-- ✅ Mark tasks as completed  
-- 🗑️ Delete tasks  
-- 💾 Save and load tasks from a JSON file in internal storage  
+## ✨ Features
 
----
+### ✅ Task Management
+- ➕ Add tasks
+- ✅ Mark tasks as completed
+- 🗑️ Delete tasks
+- 💾 Persist tasks to **internal storage** as JSON using **kotlinx.serialization**
 
-## 🚀 Technologies Used
+### 🔺 Priority Handling
+- 📊 Priority attribute per task: **low**, **medium**, **high**
+- 🧭 List **auto-sorted by priority**
 
-- [Kotlin](https://kotlinlang.org/)  
-- [Jetpack Compose](https://developer.android.com/jetpack/compose)  
-- [Kotlinx Serialization](https://github.com/Kotlin/kotlinx.serialization) — for JSON file handling  
+### 📅 Habit Planner
+- 📝 Track **daily** or **weekly** habits
+- ✔️ Mark habits as completed and view **history**
+- 📈 Visual **progress statistics** (e.g., progress charts)
 
----
+## 🛠️ Tech Stack
+- Kotlin
+- Jetpack Compose
+- ViewModel (state management)
+- NavController (navigation between screens)
+- Kotlinx Serialization (JSON)
 
-## 📦 Installation & Execution
+## 🚀 Getting Started
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/AgostinaDaghero/task-manager-compose.git
+### 1) Clone the repository
+```bash
+git clone https://github.com/AgostinaDaghero/task-manager-compose.git
+cd task-manager-compose
