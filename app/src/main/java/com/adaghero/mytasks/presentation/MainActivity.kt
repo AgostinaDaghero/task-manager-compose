@@ -12,6 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -22,6 +24,9 @@ import com.adaghero.mytasks.R
 import com.adaghero.mytasks.ui.theme.MyTasksTheme
 import com.adaghero.mytasks.viewmodel.HabitViewModel
 import com.adaghero.mytasks.viewmodel.TaskViewModel
+import com.adaghero.mytasks.viewmodel.GoalViewModel
+import com.adaghero.mytasks.viewmodel.GoalViewModelFactory
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,9 +43,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainApp() {
     val navController = rememberNavController()
+    val context = LocalContext.current
     val taskViewModel: TaskViewModel = viewModel()
     val habitViewModel: HabitViewModel = viewModel()
-    val context = LocalContext.current
+    val goalViewModel: GoalViewModel = viewModel(
+        factory = GoalViewModelFactory(context)
+    )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -57,6 +65,9 @@ fun MainApp() {
             composable("habits") {
                 HabitScreen(context = context, viewModel = habitViewModel)
             }
+            composable("goals") {
+                GoalScreen(viewModel = goalViewModel)
+            }
         }
     }
 }
@@ -65,7 +76,8 @@ fun MainApp() {
 fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
         BottomNavItem("Tasks", "tasks", R.drawable.ic_task),
-        BottomNavItem("Habits", "habits", R.drawable.ic_habit)
+        BottomNavItem("Habits", "habits", R.drawable.ic_habit),
+        BottomNavItem( "Goals", "goals", R.drawable.ic_goal)
     )
 
     NavigationBar {
