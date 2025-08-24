@@ -1,5 +1,6 @@
 package com.adaghero.mytasks.model
 
+import kotlinx.serialization.Serializable
 import java.util.UUID
 
 //ExpenseType allows us to separate income and expense
@@ -12,7 +13,7 @@ enum class Category{
     FOOD, TRANSPORT, ENTERTAINMENT, HEALTH, SALARY, OTHER
 }
 
-
+@Serializable
 data class Expense(
     val id: String = UUID.randomUUID().toString(),
     val title: String,

@@ -2,24 +2,23 @@ package com.adaghero.mytasks.data
 
 import android.content.Context
 import com.adaghero.mytasks.model.Expense
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.File
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
 
 //Repository responsible for storing and loading expenses
 class ExpenseRepository(private val context: Context) {
-    private val gson = Gson()
     private val fileName = "expenses.json"
+    private val json = Json {
+        prettyPrint = true
+        ignoreUnknownKeys = true
+    }
 
     //Holds in-memory list of expenses
-    private val _expenses = MutableStateFlow<List<Expense>>(emptyList())
+    private val _expenses = MutableStateFlow<List<Expense>>(loadFromFile())
     val expenses: StateFlow<List<Expense>> = _expenses
-
-    init {
-        loadFromFile()
-    }
 
     fun addExpense(expense: Expense) {
         _expenses.value = _expenses.value + expense
@@ -34,15 +33,19 @@ class ExpenseRepository(private val context: Context) {
 
     private fun saveToFile() {
         val file = File(context.filesDir, fileName)
-        file.writeText(gson.toJson(_expenses.value))
+        file.writeText(json.encodeToString(_expenses.value))
     }
 
-    private fun loadFromFile() {
+    private fun loadFromFile(): List<Expense> {
         val file = File(context.filesDir, fileName)
-        if (file.exists()) {
-            val listType = object : TypeToken<List<Expense>>() {}.type
-            val loaded: List<Expense> = gson.fromJson(file.readText(), listType)
-            _expenses.value = loaded
+        return if (file.exists()) {
+            try {
+                json.decodeFromString<List<Expense>>(file.readText())
+            } catch (e: Exception) {
+                emptyList()
+            }
+        } else {
+            emptyList()
         }
     }
 }

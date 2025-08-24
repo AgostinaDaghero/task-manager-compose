@@ -9,7 +9,7 @@ import java.io.File
 object TaskRepository {
     private const val FILE_NAME = "tasks.json"
 
-    // Instancia segura de Json (evita usar APIs internas)
+    //Secure Json instance (avoid using internal APIs)
     private val json = Json {
         prettyPrint = true
         ignoreUnknownKeys = true
@@ -21,7 +21,7 @@ object TaskRepository {
             emptyList()
         } else {
             try {
-                json.decodeFromString(file.readText())
+                json.decodeFromString<List<Task>>(file.readText())
             } catch (e: Exception) {
                 emptyList()
             }

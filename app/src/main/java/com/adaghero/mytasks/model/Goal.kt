@@ -1,5 +1,6 @@
 package com.adaghero.mytasks.model
 
+import kotlinx.serialization.Serializable
 import java.util.UUID
 
 data class Goal(
@@ -9,6 +10,7 @@ data class Goal(
     val subtasks: List<Subtask> = emptyList()
 )
 
+@Serializable
 data class Subtask(
     val id: String = UUID.randomUUID().toString(),
     val title: String,

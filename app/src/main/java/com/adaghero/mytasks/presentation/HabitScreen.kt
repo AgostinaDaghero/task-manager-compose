@@ -1,6 +1,5 @@
 package com.adaghero.mytasks.presentation
 
-import android.content.Context
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -26,11 +25,11 @@ import java.util.*
 
 // Main screen for displaying habits
 @Composable
-fun HabitScreen(context: Context, viewModel: HabitViewModel) {
+fun HabitScreen(viewModel: HabitViewModel) {
     val habits by viewModel.habits.collectAsState()
 
     // Load habits when screen launches
-    LaunchedEffect(Unit) { viewModel.loadHabits(context) }
+    LaunchedEffect(Unit) { viewModel.loadHabits() }
 
     var showDialog by remember { mutableStateOf(false) }
     var newHabitName by remember { mutableStateOf("") }
@@ -49,7 +48,8 @@ fun HabitScreen(context: Context, viewModel: HabitViewModel) {
             items(habits) { habit ->
                 HabitItem(
                     habit = habit,
-                    onMarkCompleted = { viewModel.markCompleted(context, habit.id) }
+                    onMarkCompleted = { viewModel.markCompleted(habit.id) }
+
                 )
             }
         }
@@ -77,7 +77,6 @@ fun HabitScreen(context: Context, viewModel: HabitViewModel) {
                 TextButton(onClick = {
                     if (newHabitName.isNotBlank()) {
                         viewModel.addHabit(
-                            context,
                             Habit(
                                 id = UUID.randomUUID().toString(),
                                 name = newHabitName,
@@ -176,7 +175,6 @@ fun WeeklyProgressChart(
         date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
     }
 
-    // Capturar los colores ANTES del bloque Canvas
     val primaryColor = MaterialTheme.colorScheme.primary
     val surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
     val outlineColor = MaterialTheme.colorScheme.outline

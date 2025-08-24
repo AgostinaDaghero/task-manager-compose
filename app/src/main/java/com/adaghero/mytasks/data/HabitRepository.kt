@@ -20,7 +20,7 @@ object HabitRepository {
             emptyList()
         } else {
             try {
-                json.decodeFromString(file.readText())
+                json.decodeFromString<List<Habit>>(file.readText())
             } catch (e: Exception) {
                 emptyList()
             }

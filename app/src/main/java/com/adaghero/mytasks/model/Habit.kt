@@ -1,4 +1,3 @@
-@file:OptIn(kotlinx.serialization.InternalSerializationApi::class)
 package com.adaghero.mytasks.model
 
 import kotlinx.serialization.Serializable

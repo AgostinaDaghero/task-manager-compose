@@ -1,42 +1,46 @@
 package com.adaghero.mytasks.viewmodel
 
-import android.content.Context
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.adaghero.mytasks.data.HabitRepository
 import com.adaghero.mytasks.model.Habit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 
-class HabitViewModel : ViewModel() {
+class HabitViewModel(application: Application) : AndroidViewModel(application) {
     private val _habits = MutableStateFlow<List<Habit>>(emptyList())
     val habits: StateFlow<List<Habit>> get() = _habits
 
-    fun loadHabits(context: Context) {
-        _habits.value = HabitRepository.loadHabits(context)
+    init {
+        loadHabits()
     }
 
-    fun addHabit(context: Context, habit: Habit) {
-        val updated = _habits.value + habit
-        _habits.value = updated
-        saveHabits(context)
+    fun loadHabits() {
+        _habits.value = HabitRepository.loadHabits(getApplication<Application>().applicationContext)
     }
 
-    fun markCompleted(context: Context, habitId: String) {
-        val updated = _habits.value.map {
+    fun addHabit(habit: Habit) {
+        _habits.value = _habits.value + habit
+        saveHabits()
+    }
+
+    fun markCompleted(habitId: String) {
+        _habits.value = _habits.value.map {
             if (it.id == habitId) {
-                it.apply { markCompletedToday() }
+                it.copy().also { h -> h.markCompletedToday() }
             } else it
         }
-        _habits.value = updated
-        saveHabits(context)
+        saveHabits()
     }
 
-    private fun saveHabits(context: Context) {
+    private fun saveHabits() {
         viewModelScope.launch {
-            HabitRepository.saveHabits(context, _habits.value)
+            HabitRepository.saveHabits(
+                getApplication<Application>().applicationContext,
+                _habits.value
+            )
         }
     }
-
 }

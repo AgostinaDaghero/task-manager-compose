@@ -25,9 +25,8 @@ import com.adaghero.mytasks.ui.theme.MyTasksTheme
 import com.adaghero.mytasks.viewmodel.HabitViewModel
 import com.adaghero.mytasks.viewmodel.TaskViewModel
 import com.adaghero.mytasks.viewmodel.GoalViewModel
-import com.adaghero.mytasks.viewmodel.GoalViewModelFactory
 import com.adaghero.mytasks.viewmodel.ExpenseViewModel
-import com.adaghero.mytasks.viewmodel.ExpenseViewModelFactory
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,12 +46,8 @@ fun MainApp() {
     val context = LocalContext.current
     val taskViewModel: TaskViewModel = viewModel()
     val habitViewModel: HabitViewModel = viewModel()
-    val goalViewModel: GoalViewModel = viewModel(
-        factory = GoalViewModelFactory(context)
-    )
-    val expenseViewModel: ExpenseViewModel = viewModel(
-        factory = ExpenseViewModelFactory(context)
-    )
+    val goalViewModel: GoalViewModel = viewModel()
+    val expenseViewModel: ExpenseViewModel = viewModel()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -67,7 +62,7 @@ fun MainApp() {
                 TaskScreen(taskViewModel = taskViewModel)
             }
             composable("habits") {
-                HabitScreen(context = context, viewModel = habitViewModel)
+                HabitScreen(viewModel = habitViewModel)
             }
             composable("goals") {
                 GoalScreen(viewModel = goalViewModel)
