@@ -26,7 +26,8 @@ import com.adaghero.mytasks.viewmodel.HabitViewModel
 import com.adaghero.mytasks.viewmodel.TaskViewModel
 import com.adaghero.mytasks.viewmodel.GoalViewModel
 import com.adaghero.mytasks.viewmodel.GoalViewModelFactory
-
+import com.adaghero.mytasks.viewmodel.ExpenseViewModel
+import com.adaghero.mytasks.viewmodel.ExpenseViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +50,9 @@ fun MainApp() {
     val goalViewModel: GoalViewModel = viewModel(
         factory = GoalViewModelFactory(context)
     )
+    val expenseViewModel: ExpenseViewModel = viewModel(
+        factory = ExpenseViewModelFactory(context)
+    )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -68,6 +72,9 @@ fun MainApp() {
             composable("goals") {
                 GoalScreen(viewModel = goalViewModel)
             }
+            composable("expenses") {
+                ExpenseScreen(viewModel = expenseViewModel)
+            }
         }
     }
 }
@@ -77,7 +84,8 @@ fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
         BottomNavItem("Tasks", "tasks", R.drawable.ic_task),
         BottomNavItem("Habits", "habits", R.drawable.ic_habit),
-        BottomNavItem( "Goals", "goals", R.drawable.ic_goal)
+        BottomNavItem( "Goals", "goals", R.drawable.ic_goal),
+        BottomNavItem("Expenses", "expenses", R.drawable.ic_expenses)
     )
 
     NavigationBar {
