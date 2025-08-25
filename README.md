@@ -27,7 +27,7 @@ A **productivity all-in-one app** built with Kotlin and **Jetpack Compose.**
 - 📊 Track overall progress of each goal
 - ✅ Mark subtasks as completed
 
-###💰 Personal Expense Tracking
+### 💰 Personal Expense Tracking
 - ➕ Register incomes and expenses with categories
 - 💾 Save and load data from a JSON file
 - 📊 Display updated balance overview
