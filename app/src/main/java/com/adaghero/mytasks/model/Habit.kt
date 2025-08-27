@@ -13,7 +13,8 @@ data class Habit(
     val id: String,
     val name: String,
     val frequency: HabitFrequency,
-    val history: MutableList<String> = mutableListOf<String>() //Dates in ISO-8601 format
+    val history: MutableList<String> = mutableListOf<String>(), //Dates in ISO-8601 format
+    val priority: String = "LOW"
 ) {
     fun markCompletedToday(){
         val today = LocalDate.now().toString()

@@ -13,8 +13,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.adaghero.mytasks.viewmodel.TaskViewModel
 import com.adaghero.mytasks.model.Priority
+import com.adaghero.mytasks.model.Task
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.Color
+
 
 
 @Composable
@@ -25,9 +28,22 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
     var selectedPriority by remember { mutableStateOf(Priority.MEDIUM) }
     var menuExpanded by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)
+    ) {
+        //Title
+        Text(
+            text = "Tasks",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        //Form for adding tasks
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextField(
+            OutlinedTextField(
                 value = newTask,
                 onValueChange = { newTask = it },
                 label = { Text("New task") },
@@ -37,7 +53,7 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
 
             // Priority selector
             Box {
-                Button(onClick = { menuExpanded = true }) {
+                FilledTonalButton(onClick = { menuExpanded = true }) {
                     Text(text = selectedPriority.name.lowercase().replaceFirstChar { it.uppercase() })
                     Icon(Icons.Default.ArrowDropDown, contentDescription = "Select priority")
                 }
@@ -74,34 +90,50 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        //Task list
         LazyColumn {
             items(tasks, key = { it.id }) { task ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(4.dp)
-                ) {
-                    Checkbox(
-                        checked = task.isDone,
-                        onCheckedChange = { checked ->
-                            taskViewModel.toggleTaskDone(task.id, checked)
-                        }
-                    )
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(task.title)
-                        // Show priority in small
-                        Text(
-                            text = task.priority.name.lowercase().replaceFirstChar { it.uppercase() },
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                    IconButton(onClick = {
-                        taskViewModel.deleteTask(task.id)
-                    }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete")
-                    }
-                }
+                TaskItem(task = task, onToggle = { checked ->
+                    taskViewModel.toggleTaskDone(task.id, checked)
+                }, onDelete = {
+                    taskViewModel.deleteTask(task.id)
+                })
+            }
+        }
+    }
+}
+
+@Composable
+fun TaskItem(task: Task, onToggle: (Boolean) -> Unit, onDelete: ()-> Unit){
+    val bgColor = when (task.priority) {
+        Priority.HIGH -> Color(0xFFFF8A80)
+        Priority.MEDIUM -> Color(0xFFFFF59D)
+        Priority.LOW -> Color(0xFFA5D6A7)
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = bgColor)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Checkbox(
+                checked = task.isDone,
+                onCheckedChange = onToggle
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(task.title, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = task.priority.name.lowercase().replaceFirstChar { it.uppercase() },
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete")
             }
         }
     }

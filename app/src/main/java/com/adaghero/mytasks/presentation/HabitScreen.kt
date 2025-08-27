@@ -9,8 +9,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -18,17 +16,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.adaghero.mytasks.model.Habit
 import com.adaghero.mytasks.model.HabitFrequency
+import com.adaghero.mytasks.ui.theme.*
 import com.adaghero.mytasks.viewmodel.HabitViewModel
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.*
+import androidx.compose.ui.graphics.toArgb
 
-// Main screen for displaying habits
+
+//Main screen for displaying habits
 @Composable
 fun HabitScreen(viewModel: HabitViewModel) {
     val habits by viewModel.habits.collectAsState()
 
-    // Load habits when screen launches
+    //Load habits when screen launches
     LaunchedEffect(Unit) { viewModel.loadHabits() }
 
     var showDialog by remember { mutableStateOf(false) }
@@ -36,9 +37,12 @@ fun HabitScreen(viewModel: HabitViewModel) {
     var newHabitFrequency by remember { mutableStateOf(HabitFrequency.DAILY) }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+
+
+
         Text("Habit Planner", style = MaterialTheme.typography.headlineSmall)
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(24.dp))
 
         Button(onClick = { showDialog = true }) { Text("Add Habit") }
 
@@ -95,10 +99,22 @@ fun HabitScreen(viewModel: HabitViewModel) {
     }
 }
 
-// Single habit item with progress chart
+//Single habit item with progress chart
 @Composable
 fun HabitItem(habit: Habit, onMarkCompleted: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+    Card(
+        modifier = Modifier
+        .fillMaxWidth()
+        .padding(vertical = 6.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = when (habit.priority) {
+                "HIGH" -> HighPriority
+                "MEDIUM" -> MediumPriority
+                "LOW" -> LowPriority
+                else -> Info
+            }
+        )
+        ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -122,7 +138,7 @@ fun HabitItem(habit: Habit, onMarkCompleted: () -> Unit) {
     }
 }
 
-// Dropdown for selecting habit frequency
+//Dropdown for selecting habit frequency
 @Composable
 fun DropdownMenuHabitFrequency(
     selected: HabitFrequency,
@@ -160,7 +176,7 @@ fun DropdownMenuHabitFrequency(
     }
 }
 
-// Weekly progress chart using Canvas
+//Weekly progress chart using Canvas
 @Composable
 fun WeeklyProgressChart(
     history: List<String>,
@@ -175,9 +191,6 @@ fun WeeklyProgressChart(
         date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
     }
 
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
-    val outlineColor = MaterialTheme.colorScheme.outline
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
     Column {
@@ -188,37 +201,35 @@ fun WeeklyProgressChart(
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(barHeight + 24.dp) // space for labels
+                .height(barHeight + 24.dp) //space for labels
         ) {
             val barCount = values.size
             val spacing = size.width * 0.04f
             val totalSpacing = spacing * (barCount + 1)
             val barWidth = (size.width - totalSpacing) / barCount
 
-            // Draw baseline (X-axis)
-            drawLine(
-                color = outlineColor, // Usar el color capturado
-                start = androidx.compose.ui.geometry.Offset(0f, heightPx),
-                end = androidx.compose.ui.geometry.Offset(size.width, heightPx),
-                strokeWidth = 2f,
-                cap = StrokeCap.Round
-            )
-
-            // Draw bars
             values.forEachIndexed { index, v ->
                 val left = spacing + index * (barWidth + spacing)
                 val barTop = heightPx * (1f - v)
+
+            //Draw baseline (X-axis)
+                val daysAgo = 6 - index
+
                 drawRect(
-                    color = if (v > 0f) primaryColor else surfaceVariantColor, // Usar colores capturados
+                    color = when {
+                        v == 0f -> HighPriority
+                        daysAgo <= 2 -> LowPriority
+                        else -> MediumPriority
+                    },
                     topLeft = androidx.compose.ui.geometry.Offset(left, barTop),
                     size = androidx.compose.ui.geometry.Size(barWidth, heightPx - barTop)
                 )
 
-                // Draw day label
+                //Draw day label
                 drawContext.canvas.nativeCanvas.apply {
                     val text = dayLabels[index].uppercase(Locale.getDefault())
                     val textPaint = android.graphics.Paint().apply {
-                        color = onSurfaceColor.toArgb() // Usar el color capturado
+                        color = onSurfaceColor.toArgb()
                         textAlign = android.graphics.Paint.Align.CENTER
                         textSize = 10.sp.toPx()
                         isAntiAlias = true
@@ -228,33 +239,30 @@ fun WeeklyProgressChart(
             }
         }
 
-        // Legend
+        Spacer(Modifier.height(8.dp))
+
+        //Legend
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(top = 4.dp)
+            modifier = Modifier.padding(top = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+
         ) {
             Box(
-                Modifier
-                    .size(12.dp)
-                    .background(primaryColor, shape = MaterialTheme.shapes.extraSmall) // Usar color capturado
+                Modifier.size(12.dp).background(LowPriority, shape = MaterialTheme.shapes.extraSmall)
             )
-            Text("Completed", style = MaterialTheme.typography.bodySmall)
-            Spacer(Modifier.width(12.dp))
+            Text("Completed Recently", style = MaterialTheme.typography.bodySmall)
+
             Box(
-                Modifier
-                    .size(12.dp)
-                    .background(surfaceVariantColor, shape = MaterialTheme.shapes.extraSmall) // Usar color capturado
+                Modifier.size(12.dp).background(MediumPriority, shape = MaterialTheme.shapes.extraSmall)
+            )
+            Text("Completed Earlier", style = MaterialTheme.typography.bodySmall)
+
+            Box(
+                Modifier.size(12.dp).background(HighPriority, shape = MaterialTheme.shapes.extraSmall)
             )
             Text("Not Completed", style = MaterialTheme.typography.bodySmall)
         }
     }
 }
 
-// Extension to convert Compose Color to ARGB
-private fun androidx.compose.ui.graphics.Color.toArgb(): Int =
-    android.graphics.Color.argb(
-        (alpha * 255).toInt(),
-        (red * 255).toInt(),
-        (green * 255).toInt(),
-        (blue * 255).toInt()
-    )
