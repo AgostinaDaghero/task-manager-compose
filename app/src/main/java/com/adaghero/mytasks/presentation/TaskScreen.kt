@@ -3,22 +3,20 @@ package com.adaghero.mytasks.presentation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.adaghero.mytasks.viewmodel.TaskViewModel
 import com.adaghero.mytasks.model.Priority
 import com.adaghero.mytasks.model.Task
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.graphics.Color
-
-
+import com.adaghero.mytasks.viewmodel.TaskViewModel
 
 @Composable
 fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
@@ -28,94 +26,104 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
     var selectedPriority by remember { mutableStateOf(Priority.MEDIUM) }
     var menuExpanded by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
-        //Title
-        Text(
-            text = "Tasks",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
+        // Tarjeta del formulario
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Tasks", style = MaterialTheme.typography.headlineSmall)
 
-        Spacer(modifier = Modifier.height(24.dp))
+                Spacer(Modifier.height(16.dp))
 
-        //Form for adding tasks
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(
-                value = newTask,
-                onValueChange = { newTask = it },
-                label = { Text("New task") },
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
+                OutlinedTextField(
+                    value = newTask,
+                    onValueChange = { newTask = it },
+                    placeholder = { Text("New task") },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            // Priority selector
-            Box {
-                FilledTonalButton(onClick = { menuExpanded = true }) {
-                    Text(text = selectedPriority.name.lowercase().replaceFirstChar { it.uppercase() })
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = "Select priority")
+                Spacer(Modifier.height(8.dp))
+
+                // Selector de prioridad
+                Box {
+                    OutlinedButton(
+                        onClick = { menuExpanded = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(selectedPriority.name.lowercase().replaceFirstChar { it.uppercase() })
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                    }
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false }
+                    ) {
+                        Priority.values().forEach { pr ->
+                            DropdownMenuItem(
+                                text = { Text(pr.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                onClick = {
+                                    selectedPriority = pr
+                                    menuExpanded = false
+                                }
+                            )
+                        }
+                    }
                 }
-                DropdownMenu(
-                    expanded = menuExpanded,
-                    onDismissRequest = { menuExpanded = false }
+
+                Spacer(Modifier.height(8.dp))
+
+                Button(
+                    onClick = {
+                        if (newTask.isNotBlank()) {
+                            taskViewModel.addTask(newTask.trim(), selectedPriority)
+                            newTask = ""
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B82F6)),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    DropdownMenuItem(text = { Text("High") }, onClick = {
-                        selectedPriority = Priority.HIGH
-                        menuExpanded = false
-                    })
-                    DropdownMenuItem(text = { Text("Medium") }, onClick = {
-                        selectedPriority = Priority.MEDIUM
-                        menuExpanded = false
-                    })
-                    DropdownMenuItem(text = { Text("Low") }, onClick = {
-                        selectedPriority = Priority.LOW
-                        menuExpanded = false
-                    })
+                    Text("Add", color = Color.White)
                 }
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Button(onClick = {
-                if (newTask.isNotBlank()) {
-                    taskViewModel.addTask(newTask.trim(), selectedPriority)
-                    newTask = ""
-                }
-            }) {
-                Text("Add")
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
-        //Task list
-        LazyColumn {
+        // Lista de tareas
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxSize()
+        ) {
             items(tasks, key = { it.id }) { task ->
-                TaskItem(task = task, onToggle = { checked ->
-                    taskViewModel.toggleTaskDone(task.id, checked)
-                }, onDelete = {
-                    taskViewModel.deleteTask(task.id)
-                })
+                TaskItem(
+                    task = task,
+                    onToggle = { checked -> taskViewModel.toggleTaskDone(task.id, checked) },
+                    onDelete = { taskViewModel.deleteTask(task.id) }
+                )
             }
         }
     }
 }
 
+/** Item de la lista (top-level) */
 @Composable
-fun TaskItem(task: Task, onToggle: (Boolean) -> Unit, onDelete: ()-> Unit){
-    val bgColor = when (task.priority) {
-        Priority.HIGH -> Color(0xFFFF8A80)
-        Priority.MEDIUM -> Color(0xFFFFF59D)
-        Priority.LOW -> Color(0xFFA5D6A7)
-    }
-
+fun TaskItem(
+    task: Task,
+    onToggle: (Boolean) -> Unit,
+    onDelete: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        colors = CardDefaults.cardColors(containerColor = bgColor)
+            .padding(vertical = 2.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -127,14 +135,14 @@ fun TaskItem(task: Task, onToggle: (Boolean) -> Unit, onDelete: ()-> Unit){
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(task.title, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    text = task.priority.name.lowercase().replaceFirstChar { it.uppercase() },
-                    style = MaterialTheme.typography.labelSmall
-                )
+                Text(task.priority.name.lowercase().replaceFirstChar { it.uppercase() })
             }
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete")
+                Icon(Icons.Default.Delete, contentDescription = null)
             }
         }
     }
 }
+
+
+

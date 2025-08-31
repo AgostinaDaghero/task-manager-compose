@@ -10,7 +10,7 @@ enum class ExpenseType{
 
 //Category gives better tracking of spending sources
 enum class Category{
-    FOOD, TRANSPORT, ENTERTAINMENT, HEALTH, SALARY, OTHER
+    GENERAL, FOOD, TRANSPORT, ENTERTAINMENT, HEALTH, SALARY, OTHER
 }
 
 @Serializable

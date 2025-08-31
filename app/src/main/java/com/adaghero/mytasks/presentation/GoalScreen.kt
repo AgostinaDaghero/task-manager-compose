@@ -10,9 +10,10 @@ import androidx.compose.ui.unit.dp
 import com.adaghero.mytasks.model.Goal
 import com.adaghero.mytasks.model.Subtask
 import com.adaghero.mytasks.ui.theme.HighPriority
-import com.adaghero.mytasks.ui.theme.MediumPriority
-import com.adaghero.mytasks.ui.theme.LowPriority
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.adaghero.mytasks.viewmodel.GoalViewModel
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Alignment
 
 @Composable
 fun GoalScreen(viewModel: GoalViewModel) {
@@ -25,8 +26,7 @@ fun GoalScreen(viewModel: GoalViewModel) {
 
         Text(
             text = "My Goals",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
+            style = MaterialTheme.typography.headlineMedium
         )
 
         Spacer(Modifier.height(24.dp))
@@ -37,12 +37,14 @@ fun GoalScreen(viewModel: GoalViewModel) {
             label = { Text("Goal title") },
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(Modifier.height(8.dp))
         OutlinedTextField(
             value = description,
             onValueChange = { description = it },
             label = { Text("Description") },
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+            modifier = Modifier.fillMaxWidth()
         )
+        Spacer(Modifier.height(8.dp))
         Button(
             onClick = {
                 if (title.isNotBlank()) {
@@ -51,9 +53,10 @@ fun GoalScreen(viewModel: GoalViewModel) {
                     description = ""
                 }
             },
-            modifier = Modifier.padding(top = 8.dp)
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B82F6)),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Add Goal")
+            Text("Add Goal", color = Color.White)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -71,25 +74,23 @@ fun GoalItem(goal: Goal, viewModel: GoalViewModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(8.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        Column(modifier = Modifier.padding(8.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(text = goal.title, style = MaterialTheme.typography.titleMedium)
             Text(text = goal.description, style = MaterialTheme.typography.bodyMedium)
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            goal.subtasks.forEach { subtask ->
-                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            goal.subtasks.forEach { sub ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
-                        checked = subtask.completed,
-                        onCheckedChange = { viewModel.toggleSubtask(goal.id, subtask.id) },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = LowPriority,
-                            uncheckedColor = MediumPriority
-                        )
+                        checked = sub.completed,
+                        onCheckedChange = { viewModel.toggleSubtask(goal.id, sub.id) },
                     )
-                    Text(subtask.title)
+                    Text(sub.title)
                 }
             }
 

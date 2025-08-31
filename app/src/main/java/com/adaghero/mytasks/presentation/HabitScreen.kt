@@ -6,10 +6,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -21,30 +27,27 @@ import com.adaghero.mytasks.viewmodel.HabitViewModel
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.*
-import androidx.compose.ui.graphics.toArgb
 
 
 //Main screen for displaying habits
 @Composable
 fun HabitScreen(viewModel: HabitViewModel) {
     val habits by viewModel.habits.collectAsState()
-
-    //Load habits when screen launches
-    LaunchedEffect(Unit) { viewModel.loadHabits() }
-
     var showDialog by remember { mutableStateOf(false) }
     var newHabitName by remember { mutableStateOf("") }
     var newHabitFrequency by remember { mutableStateOf(HabitFrequency.DAILY) }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-
-
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
 
         Text("Habit Planner", style = MaterialTheme.typography.headlineSmall)
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(16.dp))
 
-        Button(onClick = { showDialog = true }) { Text("Add Habit") }
+        Button(onClick = { showDialog = true },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B82F6))
+            ) { Text("Add Habit") }
 
         Spacer(Modifier.height(16.dp))
 
@@ -68,7 +71,7 @@ fun HabitScreen(viewModel: HabitViewModel) {
                     OutlinedTextField(
                         value = newHabitName,
                         onValueChange = { newHabitName = it },
-                        label = { Text("Habit Name") }
+                        placeholder = { Text("Habit Name") }
                     )
                     Spacer(Modifier.height(8.dp))
                     DropdownMenuHabitFrequency(
@@ -104,36 +107,33 @@ fun HabitScreen(viewModel: HabitViewModel) {
 fun HabitItem(habit: Habit, onMarkCompleted: () -> Unit) {
     Card(
         modifier = Modifier
-        .fillMaxWidth()
-        .padding(vertical = 6.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = when (habit.priority) {
-                "HIGH" -> HighPriority
-                "MEDIUM" -> MediumPriority
-                "LOW" -> LowPriority
-                else -> Info
-            }
-        )
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
         ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column {
                     Text(habit.name, style = MaterialTheme.typography.titleMedium)
                     Text("Frequency: ${habit.frequency}")
                 }
-                Button(onClick = onMarkCompleted) { Text("Mark Today ✔") }
+                Button(onClick = onMarkCompleted,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B82F6))
+                    ) {
+                    Text("Mark Today ", color = Color.White) }
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(8.dp))
 
-            WeeklyProgressChart(
-                history = habit.history,
-                barHeight = 60.dp,
-                label = "Last 7 days"
-            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf("Mon","Tue","Wed","Thu","Fri","Sat","Sun").forEach { day ->
+                    Box(
+                        Modifier.size(12.dp).background(Color.LightGray, CircleShape)
+                    )
+                }
+            }
         }
     }
 }
@@ -147,30 +147,15 @@ fun DropdownMenuHabitFrequency(
     var expanded by remember { mutableStateOf(false) }
 
     Box {
-        OutlinedButton(onClick = { expanded = true }) {
-            Text(
-                when (selected) {
-                    HabitFrequency.DAILY -> "DAILY"
-                    HabitFrequency.WEEKLY -> "WEEKLY"
-                }
-            )
+        OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) {
+            Text(selected.name)
+            Icon(Icons.Default.ArrowDropDown, null)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             HabitFrequency.values().forEach {
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            when (it) {
-                                HabitFrequency.DAILY -> "DAILY"
-                                HabitFrequency.WEEKLY -> "WEEKLY"
-                            }
-                        )
-                    },
-                    onClick = {
-                        onSelect(it)
-                        expanded = false
-                    }
-                )
+                DropdownMenuItem(text = { Text(it.name) }, onClick = {
+                    onSelect(it); expanded = false
+                })
             }
         }
     }
@@ -249,17 +234,23 @@ fun WeeklyProgressChart(
 
         ) {
             Box(
-                Modifier.size(12.dp).background(LowPriority, shape = MaterialTheme.shapes.extraSmall)
+                Modifier
+                    .size(12.dp)
+                    .background(LowPriority, shape = MaterialTheme.shapes.extraSmall)
             )
             Text("Completed Recently", style = MaterialTheme.typography.bodySmall)
 
             Box(
-                Modifier.size(12.dp).background(MediumPriority, shape = MaterialTheme.shapes.extraSmall)
+                Modifier
+                    .size(12.dp)
+                    .background(MediumPriority, shape = MaterialTheme.shapes.extraSmall)
             )
             Text("Completed Earlier", style = MaterialTheme.typography.bodySmall)
 
             Box(
-                Modifier.size(12.dp).background(HighPriority, shape = MaterialTheme.shapes.extraSmall)
+                Modifier
+                    .size(12.dp)
+                    .background(HighPriority, shape = MaterialTheme.shapes.extraSmall)
             )
             Text("Not Completed", style = MaterialTheme.typography.bodySmall)
         }
