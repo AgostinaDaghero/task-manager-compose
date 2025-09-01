@@ -26,10 +26,22 @@ class GoalViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun deleteGoal(goalId: String) {
+        viewModelScope.launch {
+            repository.deleteGoal(goalId)
+        }
+    }
+
     // Add a new subtask to an existing goal
     fun addSubtask(goalId: String, subtask: Subtask) {
         viewModelScope.launch {
             repository.addSubtask(goalId, subtask)
+        }
+    }
+
+    fun deleteSubtask(goalId: String, subtaskId: String) {
+        viewModelScope.launch {
+            repository.deleteSubtask(goalId, subtaskId)
         }
     }
 

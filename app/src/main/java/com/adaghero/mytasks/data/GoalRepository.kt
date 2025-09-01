@@ -24,9 +24,23 @@ class GoalRepository(private val context: Context) {
         saveToFile()
     }
 
+    fun deleteGoal(goalId: String) {
+        _goals.value = _goals.value.filterNot { it.id == goalId }
+        saveToFile()
+    }
+
     fun addSubtask(goalId: String, subtask: Subtask) {
         _goals.value = _goals.value.map {
             if (it.id == goalId) it.copy(subtasks = it.subtasks + subtask) else it
+        }
+        saveToFile()
+    }
+
+    fun deleteSubtask(goalId: String, subtaskId: String) {
+        _goals.value = _goals.value.map { goal ->
+            if (goal.id == goalId) {
+                goal.copy(subtasks = goal.subtasks.filterNot { it.id == subtaskId })
+            } else goal
         }
         saveToFile()
     }
