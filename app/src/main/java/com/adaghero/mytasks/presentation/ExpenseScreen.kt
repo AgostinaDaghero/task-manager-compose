@@ -294,7 +294,10 @@ fun PieChart(expenses: List<Expense>, modifier: Modifier = Modifier) {
 
 @Composable
 fun Legend() {
-    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+    Row(modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.size(12.dp).background(Color(0xFF22C55E)))
             Spacer(modifier = Modifier.width(4.dp))
