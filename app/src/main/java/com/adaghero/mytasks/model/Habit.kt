@@ -2,9 +2,11 @@ package com.adaghero.mytasks.model
 
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
+import java.time.temporal.WeekFields
+import java.util.Locale
 
 @Serializable
-enum class HabitFrequency{
+enum class HabitFrequency {
     DAILY, WEEKLY
 }
 
@@ -16,10 +18,20 @@ data class Habit(
     val history: MutableList<String> = mutableListOf<String>(), //Dates in ISO-8601 format
     val priority: String = "LOW"
 ) {
-    fun markCompletedToday(){
+    fun isCompletedToday(): Boolean {
         val today = LocalDate.now().toString()
-        if (!history.contains(today)){
-            history.add(today)
+        return history.contains(today)
+    }
+
+    fun isCompletedThisWeek(): Boolean {
+        val today = LocalDate.now()
+        val weekOfYear = today.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
+        val year = today.year
+        return history.any {
+            val date = LocalDate.parse(it)
+            val w = date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
+            val y = date.year
+            w == weekOfYear && y == year
         }
     }
 }

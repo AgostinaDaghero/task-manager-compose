@@ -3,11 +3,13 @@ package com.adaghero.mytasks.viewmodel
 import androidx.lifecycle.viewModelScope
 import com.adaghero.mytasks.data.HabitRepository
 import com.adaghero.mytasks.model.Habit
+import com.adaghero.mytasks.model.HabitFrequency
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import androidx.lifecycle.AndroidViewModel
 import android.app.Application
+import java.time.LocalDate
 
 class HabitViewModel(application: Application) : AndroidViewModel(application) {
     private val _habits = MutableStateFlow<List<Habit>>(emptyList())
@@ -26,11 +28,28 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
         saveHabits()
     }
 
+    fun deleteHabit(habitId: String) {
+        _habits.value = _habits.value.filter { it.id != habitId }
+        saveHabits()
+    }
+
     fun markCompleted(habitId: String) {
-        _habits.value = _habits.value.map {
-            if (it.id == habitId) {
-                it.copy().also { h -> h.markCompletedToday() }
-            } else it
+        _habits.value = _habits.value.map { habit ->
+            if (habit.id == habitId) {
+                val updatedHistory = habit.history.toMutableList()
+                val today = LocalDate.now().toString()
+
+                when (habit.frequency) {
+                    HabitFrequency.DAILY -> {
+                        if (!habit.isCompletedToday()) updatedHistory.add(today)
+                    }
+
+                    HabitFrequency.WEEKLY -> {
+                        if (!habit.isCompletedThisWeek()) updatedHistory.add(today)
+                    }
+                }
+                habit.copy(history = updatedHistory)
+            } else habit
         }
         saveHabits()
     }
