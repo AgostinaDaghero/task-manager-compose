@@ -25,6 +25,16 @@ class ExpenseRepository(private val context: Context) {
         saveToFile()
     }
 
+    fun updateExpense(updated: Expense) {
+        _expenses.value = _expenses.value.map { if (it.id == updated.id) updated else it }
+        saveToFile()
+    }
+
+    fun deleteExpense(id: String) {
+        _expenses.value = _expenses.value.filterNot { it.id == id }
+        saveToFile()
+    }
+
     fun getBalance(): Double {
         val income = _expenses.value.filter { it.type.name == "INCOME" }.sumOf { it.amount }
         val expense = _expenses.value.filter { it.type.name == "EXPENSE" }.sumOf { it.amount }

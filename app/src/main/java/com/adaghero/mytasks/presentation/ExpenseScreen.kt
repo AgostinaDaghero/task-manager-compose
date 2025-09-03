@@ -19,6 +19,10 @@ import com.adaghero.mytasks.model.Category
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import java.util.UUID
 
 
 
@@ -29,6 +33,7 @@ fun ExpenseScreen(viewModel: ExpenseViewModel) {
     var title by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var type by remember { mutableStateOf(ExpenseType.EXPENSE) }
+    var editingExpense by remember { mutableStateOf<Expense?>(null) }
 
     LazyColumn(modifier = Modifier
         .fillMaxSize()
@@ -53,118 +58,175 @@ fun ExpenseScreen(viewModel: ExpenseViewModel) {
 
         item {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp),
-                contentAlignment = Alignment.Center
-            ) {
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center){
                 PieChart(
                     expenses = expenses,
-                    modifier = Modifier.size(200.dp)
+                    modifier = Modifier.size(160.dp)
                 )
             }
         }
 
         item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    OutlinedTextField(
-                        value = title,
-                        onValueChange = { title = it },
-                        label = { Text("Title") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = amount,
-                        onValueChange = { amount = it },
-                        label = { Text("Amount") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Button(
-                            onClick = { type = ExpenseType.INCOME },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22C55E)),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Income", color = Color.White)
+            TransactionForm(
+                title = title,
+                amount = amount,
+                type = type,
+                onTitleChange = { title = it },
+                onAmountChange = { amount = it },
+                onTypeChange = { type = it },
+                onSave = {
+                    if (amount.isNotBlank() && title.isNotBlank()) {
+                        val newExpense = Expense(
+                            id = editingExpense?.id ?: UUID.randomUUID().toString(),
+                            title = title,
+                            amount = amount.toDoubleOrNull() ?: 0.0,
+                            category = Category.GENERAL,
+                            type = type
+                        )
+                        if (editingExpense != null) {
+                            viewModel.updateExpense(newExpense)
+                        } else {
+                            viewModel.addExpense(newExpense)
                         }
-
-                        Button(
-                            onClick = { type = ExpenseType.EXPENSE },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444)),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Expense", color = Color.White)
-                        }
+                        title = ""
+                        amount = ""
+                        editingExpense = null
                     }
-
-                    Button(
-                        onClick = {
-                            if (amount.isNotBlank() && title.isNotBlank()) {
-                                viewModel.addExpense(
-                                    Expense(
-                                        title = title,
-                                        amount = amount.toDoubleOrNull() ?: 0.0,
-                                        category = Category.GENERAL,
-                                        type = type
-                                    )
-                                )
-                                title = ""
-                                amount = ""
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B82F6)),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Add Transaction", color = Color.White)
-                    }
-                }
-            }
+                },
+                isEditing = editingExpense != null
+            )
         }
 
         items(expenses) { exp ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ExpenseItem(
+                exp = exp,
+                onEdit = {
+                    title = exp.title
+                    amount = exp.amount.toString()
+                    type = exp.type
+                    editingExpense = exp
+                },
+                onDelete = { viewModel.deleteExpense(exp.id) }
+            )
+        }
+    }
+}
+
+@Composable
+fun TransactionForm(
+    title: String,
+    amount: String,
+    type: ExpenseType,
+    onTitleChange: (String) -> Unit,
+    onAmountChange: (String) -> Unit,
+    onTypeChange: (ExpenseType) -> Unit,
+    onSave: () -> Unit,
+    isEditing: Boolean
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedTextField(
+                value = title,
+                onValueChange = onTitleChange,
+                label = { Text("Title") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = amount,
+                onValueChange = onAmountChange,
+                label = { Text("Amount") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Segmented control
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = exp.title,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = exp.type.name,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (exp.type == ExpenseType.INCOME) Color(0xFF22C55E) else Color(0xFFEF4444)
-                        )
-                    }
-                    Text(
-                        text = "${if (exp.type == ExpenseType.INCOME) "+" else "-"}$${exp.amount}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = if (exp.type == ExpenseType.INCOME) Color(0xFF22C55E) else Color(0xFFEF4444)
-                    )
-                }
+                SegmentedButton(
+                    selected = type == ExpenseType.INCOME,
+                    onClick = { onTypeChange(ExpenseType.INCOME) },
+                    text = "Income",
+                    color = Color(0xFF22C55E)
+                )
+                Spacer(Modifier.width(8.dp))
+                SegmentedButton(
+                    selected = type == ExpenseType.EXPENSE,
+                    onClick = { onTypeChange(ExpenseType.EXPENSE) },
+                    text = "Expense",
+                    color = Color(0xFFEF4444)
+                )
+            }
+
+            Button(
+                onClick = onSave,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B82F6)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    if (isEditing) "Update Transaction" else "Add Transaction",
+                    color = Color.White
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun RowScope.SegmentedButton(
+    selected: Boolean,
+    onClick: () -> Unit,
+    text: String,
+    color: Color
+) {
+    Button(
+        onClick = onClick,
+        colors = if (selected)
+            ButtonDefaults.buttonColors(containerColor = color)
+        else
+            ButtonDefaults.outlinedButtonColors(),
+        modifier = Modifier.weight(1f)
+    ) {
+        Text(text, color = if (selected) Color.White else color)
+    }
+}
+
+@Composable
+fun ExpenseItem(exp: Expense, onEdit: () -> Unit, onDelete: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(exp.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                Text(
+                    exp.type.name,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (exp.type == ExpenseType.INCOME) Color(0xFF22C55E) else Color(0xFFEF4444)
+                )
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "${if (exp.type == ExpenseType.INCOME) "+" else "-"}$${exp.amount}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = if (exp.type == ExpenseType.INCOME) Color(0xFF22C55E) else Color(0xFFEF4444)
+                )
+                Spacer(Modifier.width(8.dp))
+                IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit") }
+                IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, contentDescription = "Delete") }
             }
         }
     }
@@ -178,44 +240,26 @@ fun PieChart(expenses: List<Expense>, modifier: Modifier = Modifier) {
 
     if (total == 0.0) {
 
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("No data available", style = MaterialTheme.typography.bodyMedium)
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .background(Color(0xFF22C55E))
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Income")
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .background(Color(0xFFEF4444))
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Expense")
-                }
+        Box(
+            modifier = modifier,
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("No data available", style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.height(12.dp))
+                Legend()
             }
         }
+        return
     }
-    return
-}
+
     val incomeAngle = (totalIncome / total * 360).toFloat()
     val expenseAngle = (totalExpense / total * 360).toFloat()
 
     Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-        Canvas(modifier = modifier
-            .aspectRatio(1f)
+        Canvas(
+            modifier = modifier
+                .aspectRatio(1f)
         ) {
             val canvasSize = size.minDimension
             val radius = canvasSize / 2 - 8.dp.toPx()
@@ -226,36 +270,40 @@ fun PieChart(expenses: List<Expense>, modifier: Modifier = Modifier) {
                 radius = radius,
                 center = center
             )
-            drawArc(color = Color(0xFF22C55E), -90f, incomeAngle, true,
-                topLeft = Offset(
-                    center.x - radius,
-                    center.y - radius),
-                size = Size(radius * 2, radius * 2))
-            drawArc(color = Color(0xFFEF4444), -90f + incomeAngle, expenseAngle, true,
+            drawArc(
+                color = Color(0xFF22C55E), -90f, incomeAngle, true,
                 topLeft = Offset(
                     center.x - radius,
                     center.y - radius
                 ),
-                size = Size(radius * 2, radius * 2))
+                size = Size(radius * 2, radius * 2)
+            )
+            drawArc(
+                color = Color(0xFFEF4444), -90f + incomeAngle, expenseAngle, true,
+                topLeft = Offset(
+                    center.x - radius,
+                    center.y - radius
+                ),
+                size = Size(radius * 2, radius * 2)
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
+        Legend()
+    }
+}
 
-        //Caption below the graph
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                Box(modifier = Modifier
-                    .size(12.dp)
-                    .background(Color(0xFF22C55E)))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Income")
-            }
-            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                Box(modifier = Modifier
-                    .size(12.dp)
-                    .background(Color(0xFFEF4444)))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Expense")
-            }
+@Composable
+fun Legend() {
+    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(12.dp).background(Color(0xFF22C55E)))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Income")
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(12.dp).background(Color(0xFFEF4444)))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Expense")
         }
     }
 }
