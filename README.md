@@ -1,53 +1,139 @@
-# 📝 Task Manager — Kotlin + Jetpack Compose
+# 📝 MyTasks — Productivity App (Kotlin + Jetpack Compose)
 
-A **productivity all-in-one app** built with Kotlin and **Jetpack Compose.**
- Includes task management with priorities, habit tracking, goal planning, and a simple personal expenses tracker.
+**MyTasks** is an Android productivity application built with **Kotlin and Jetpack Compose**.
+The app combines several productivity tools in one place, allowing users to manage tasks, track habits, organize goals, and monitor personal expenses.
 
-## ✨ Features
+---
 
-### ✅ Task Management
-- ➕ Add new tasks
-- ✅ Mark tasks as completed
-- 🗑️ Delete tasks
-- 🔺 Priorities: low, medium, high
-- 📊 List automatically sorted by priority
-- 🔍 Filter or group tasks by priority level
-- 💾 Persist tasks to a JSON file in internal storage
+# 📸 Screenshots
 
+## Tasks
 
-### 📅 Habit Planner
-- 📝 Register daily or weekly habits
-- ✔️ Mark habits as completed
-- 📜 View habit history
-- 📈 Visual progress statistics
+<img src="screenshots/tasks_overview.png" width="250"/>
+<img src="screenshots/tasks_create.png" width="250"/>
+<img src="screenshots/tasks_filter.png" width="250"/>
 
-### 🎯 Goals & Objectives
-- 🏆 Define long-term goals (title and description)
-- ➕ Add subtasks or steps to each goal
-- 📊 Track overall progress of each goal
-- ✅ Mark subtasks as completed
+Features shown:
 
-### 💰 Personal Expense Tracking
-- ➕ Register incomes and expenses with categories
-- 💾 Save and load data from a JSON file
-- 📊 Display updated balance overview
-- 📑 Basic reports of transactions
+* Create tasks
+* Assign priorities
+* Filter tasks by priority
+* Mark tasks as completed
 
+---
 
-## 🛠️ Tech Stack
-- Kotlin
-- Jetpack Compose (modern declarative UI)
-- ViewModel (state management)
-- NavController (navigation between screens)
-- Kotlinx Serialization (JSON persistence)
+## Habits
 
-## 🚀 Getting Started
+<img src="screenshots/habits_screen.png" width="250"/>
 
-1) Clone the repository
+Features shown:
 
+* Daily and weekly habits
+* Habit completion tracking
+* Weekly progress visualization
+
+---
+
+## Goals
+
+<img src="screenshots/goals_screen.png" width="250"/>
+
+Features shown:
+
+* Long-term goal planning
+* Subtask management
+* Progress tracking
+
+---
+
+## Expenses
+
+<img src="screenshots/expenses_list.png" width="250"/>
+<img src="screenshots/expenses_chart.png" width="250"/>
+
+Features shown:
+
+* Income and expense tracking
+* Balance overview
+* Pie chart visualization
+
+---
+
+# ✨ Features
+
+## Task Management
+
+* Add new tasks
+* Mark tasks as completed
+* Delete tasks
+* Priority levels (**Low, Medium, High**)
+* Automatic sorting by priority
+* Task filtering by priority
+* Local persistence using JSON storage
+
+## Habit Planner
+
+* Daily and weekly habits
+* Habit completion tracking
+* Visual weekly progress charts
+
+## Goals & Objectives
+
+* Create long-term goals
+* Add subtasks
+* Track goal progress
+
+## Expense Tracker
+
+* Register incomes and expenses
+* Automatic balance calculation
+* Transaction history
+* Pie chart visualization
+
+---
+
+# 🛠 Tech Stack
+
+* **Kotlin**
+* **Jetpack Compose**
+* **Material 3**
+* **MVVM Architecture**
+* **ViewModel**
+* **StateFlow**
+* **Navigation Compose**
+* **Kotlinx Serialization**
+
+---
+
+# 🧠 Architecture
+
+The app follows an **MVVM architecture**:
+
+```
+UI (Jetpack Compose)
+        ↓
+ViewModel
+        ↓
+Repository
+        ↓
+Local JSON Storage
+```
+
+---
+
+# 🚀 Getting Started
+
+### Clone the repository
+
+```
 git clone https://github.com/AgostinaDaghero/task-manager-compose.git
 cd task-manager-compose
+```
 
-2) Open the project in Android Studio (Arctic Fox or newer)
+### Open in Android Studio
 
-3) Build and run on an emulator or physical device
+Open the project using **Android Studio (Arctic Fox or newer)**.
+
+### Run the app
+
+Run the application on an **Android emulator or a physical device**.
